@@ -10,59 +10,55 @@ export function t(key: TranslationKey, lang: Lang): string {
   return translations[lang][key] ?? translations['tr'][key] ?? key;
 }
 
+const pathMap: Record<string, string> = {
+  '/': '/',
+  '/hizmetler': '/services',
+  '/lokalizasyon': '/rollout',
+  '/referanslar': '/references',
+  '/hakkimizda': '/about',
+  '/iletisim': '/contact',
+  '/sap-refx': '/sap-refx',
+  '/sap-opentext': '/sap-opentext',
+  '/sap-checkup': '/sap-checkup',
+  '/danismanlik': '/consulting',
+  '/s4hana': '/s4hana',
+  '/sap-trm': '/sap-trm',
+  '/sap-cash-management': '/sap-cash-management',
+};
+
+function normalizePath(path: string): string {
+  // Remove trailing slash except for root
+  if (path === '/' || path === '') return '/';
+  return path.endsWith('/') ? path.slice(0, -1) : path;
+}
+
 export function getLocalePath(path: string, lang: Lang): string {
-  if (lang === 'tr') return path;
+  const normalized = normalizePath(path);
+  if (lang === 'tr') return normalized;
   
-  // Map TR paths to EN paths
-  const pathMap: Record<string, string> = {
-    '/': '/en/',
-    '/hizmetler': '/en/services',
-    '/lokalizasyon': '/en/rollout',
-    '/referanslar': '/en/references',
-    '/hakkimizda': '/en/about',
-    '/iletisim': '/en/contact',
-    '/sap-refx': '/en/sap-refx',
-    '/sap-opentext': '/en/sap-opentext',
-    '/sap-checkup': '/en/sap-checkup',
-    '/danismanlik': '/en/consulting',
-    '/s4hana': '/en/s4hana',
-  };
-  return pathMap[path] || `/en${path}`;
+  // Find the EN segment from our map
+  const enSegment = pathMap[normalized];
+  return enSegment ? `/en${enSegment === '/' ? '/' : enSegment}` : `/en${normalized}`;
 }
 
 export function getAlternateLangPath(currentPath: string, currentLang: Lang): string {
+  const normalized = normalizePath(currentPath);
+  
   if (currentLang === 'tr') {
     // TR → EN
-    const map: Record<string, string> = {
-      '/': '/en/',
-      '/hizmetler': '/en/services',
-      '/lokalizasyon': '/en/rollout',
-      '/referanslar': '/en/references',
-      '/hakkimizda': '/en/about',
-      '/iletisim': '/en/contact',
-      '/sap-refx': '/en/sap-refx',
-      '/sap-opentext': '/en/sap-opentext',
-      '/sap-checkup': '/en/sap-checkup',
-      '/danismanlik': '/en/consulting',
-      '/s4hana': '/en/s4hana',
-    };
-    return map[currentPath] || `/en${currentPath}`;
+    const enSegment = pathMap[normalized];
+    return enSegment ? `/en${enSegment === '/' ? '/' : enSegment}` : `/en${normalized}`;
   } else {
     // EN → TR
-    const map: Record<string, string> = {
-      '/en/': '/',
-      '/en': '/',
-      '/en/services': '/hizmetler',
-      '/en/rollout': '/lokalizasyon',
-      '/en/references': '/referanslar',
-      '/en/about': '/hakkimizda',
-      '/en/contact': '/iletisim',
-      '/en/sap-refx': '/sap-refx',
-      '/en/sap-opentext': '/sap-opentext',
-      '/en/sap-checkup': '/sap-checkup',
-      '/en/consulting': '/danismanlik',
-      '/en/s4hana': '/s4hana',
-    };
-    return map[currentPath] || currentPath.replace('/en', '');
+    // Remove /en prefix
+    const pathWithoutEn = normalized.startsWith('/en/') 
+      ? normalized.replace('/en/', '/') 
+      : normalized === '/en' ? '/' : normalized.replace('/en', '');
+    
+    const trNormalized = normalizePath(pathWithoutEn);
+    
+    // Find the TR key by searching the map values
+    const trPath = Object.keys(pathMap).find(key => pathMap[key] === trNormalized);
+    return trPath || trNormalized;
   }
 }
