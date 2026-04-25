@@ -29,9 +29,9 @@ const otherLang = lang === 'tr' ? 'EN' : 'TR';
 <nav class="fixed top-0 w-full z-50 glass-nav transition-all duration-300" id="main-nav">
     <div class="flex justify-between items-center px-8 md:px-12 py-3.5 max-w-[1920px] mx-auto relative z-20 bg-transparent">
         <!-- Logo -->
-        <div class="flex items-center">
-            <a href={getLocalePath('/', lang)} class="flex items-center group">
-                <img src="/images/finsoft-logo-png.png" alt="Finsoft" class="h-16 md:h-24 lg:h-36 w-auto object-contain flex-shrink-0 group-hover:scale-105 transition-transform duration-300" />
+        <div class="flex items-center flex-shrink-0 min-w-max">
+            <a href={getLocalePath('/', lang)} class="flex items-center group flex-shrink-0">
+                <img src="/images/finsoft-logo-png.png" alt="Finsoft" class="h-14 md:h-12 lg:h-16 w-auto object-contain flex-shrink-0 group-hover:scale-105 transition-transform duration-300" />
             </a>
         </div>
         <!-- Navigation (Desktop) -->
