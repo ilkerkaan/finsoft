@@ -1,13 +1,91 @@
 ---
-export interface Props {
-  title: string;
-  lang?: 'tr' | 'en';
-}
-
-const { title, lang = 'tr' } = Astro.props;
+import { getAlternateLangPath } from '../i18n/utils';
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+
+export interface Props {
+  title: string;
+  description?: string;
+  lang?: 'tr' | 'en';
+}
+
+const { title, description, lang = 'tr' } = Astro.props;
+const siteUrl = 'https://www.finsoft.com.tr';
+const defaultDescriptions = {
+  tr: "Finsoft, SAP FI/CO, Material Ledger, S/4HANA, roll-out ve Turkiye lokalizasyonu projelerinde uzman danismanlik sunar.",
+  en: "Finsoft provides expert consulting for SAP FI/CO, Material Ledger, S/4HANA, global roll-out and Turkey localization projects."
+} as const;
+const pathDescriptions = {
+  tr: {
+    '/': "Finsoft, SAP FI/CO, Material Ledger, S/4HANA ve Turkiye lokalizasyonu projelerinde 15+ yillik danismanlik deneyimi sunar.",
+    '/hizmetler': "SAP FI/CO, Material Ledger, S/4HANA donusumu, dis kaynak danismanlik ve Turkiye lokalizasyonu hizmetlerini inceleyin.",
+    '/lokalizasyon': "Global SAP sablonlarini Turkiye mevzuatina uyarlayan ve uluslararasi roll-out projelerini yoneten Finsoft uzmanligini kesfedin.",
+    '/referanslar': "Finsoft'un SAP finans donusumu, lokalizasyon ve entegrasyon projelerinde calistigi markalari ve vaka analizlerini inceleyin.",
+    '/hakkimizda': "2010'dan beri SAP finans cozumlerinde uzmanlasan Finsoft'un yaklasimini, vizyonunu ve danismanlik odagini taniyin.",
+    '/iletisim': "SAP finans, S/4HANA ve lokalizasyon projeleriniz icin Finsoft ekibiyle iletisime gecin ve donusum yol haritanizi degerlendirin.",
+    '/danismanlik': "Finsoft'un stratejik SAP danismanlik, donusum planlama ve operasyonel iyilestirme hizmetlerini kesfedin.",
+    '/s4hana': "SAP S/4HANA gecisi, finans surec tasarimi ve veri donusumu icin Finsoft'un uzman danismanlik yaklasimini inceleyin.",
+    '/sap-cash-management': "SAP Cash Management ile nakit gorunurlugu, likidite planlama ve finansal kontrol sureclerinizi Finsoft uzmanligiyla guclendirin.",
+    '/sap-checkup': "SAP sistem saglik kontrolu, surec analizi ve iyilestirme firsatlari icin Finsoft SAP Check-Up hizmetini kesfedin.",
+    '/sap-opentext': "SAP ve OpenText entegrasyonlariyla dokuman yonetimi, arsivleme ve finans operasyonlarini daha verimli hale getirin.",
+    '/sap-refx': "SAP RE-FX cozumleriyle gayrimenkul sozlesmeleri, kira yonetimi ve finansal entegrasyon sureclerinizi yonetin.",
+    '/sap-trm': "SAP Treasury and Risk Management cozumleriyle nakit, odeme ve finansal risk sureclerinizi merkezi olarak yonetin."
+  },
+  en: {
+    '/en/': "Finsoft delivers 15+ years of consulting expertise across SAP FI/CO, Material Ledger, S/4HANA and Turkey localization projects.",
+    '/en/services': "Explore Finsoft's SAP FI/CO, Material Ledger, S/4HANA transformation, localization and outsourced consulting services.",
+    '/en/rollout': "Discover Finsoft's expertise in global SAP roll-out projects and Turkey localization for multinational finance operations.",
+    '/en/references': "Review the brands and case studies that reflect Finsoft's SAP finance transformation and localization experience.",
+    '/en/about': "Learn about Finsoft's approach, vision and specialization in SAP finance consulting since 2010.",
+    '/en/contact': "Contact Finsoft to discuss SAP finance, S/4HANA and localization initiatives with an expert consulting team.",
+    '/en/consulting': "Explore Finsoft's strategic SAP consulting, transformation planning and finance process improvement services.",
+    '/en/s4hana': "See how Finsoft supports SAP S/4HANA migration, finance process design and data transition projects.",
+    '/en/sap-cash-management': "Strengthen cash visibility, liquidity planning and treasury operations with Finsoft's SAP Cash Management expertise.",
+    '/en/sap-checkup': "Identify process risks and improvement opportunities with Finsoft's SAP system check-up service.",
+    '/en/sap-opentext': "Improve document management, archiving and finance workflows with SAP and OpenText consulting services.",
+    '/en/sap-refx': "Manage lease contracts, property operations and finance integration with SAP RE-FX consulting from Finsoft.",
+    '/en/sap-trm': "Centralize treasury, payment and financial risk management processes with Finsoft's SAP TRM expertise."
+  }
+} as const;
+
+const rawPath = Astro.url.pathname || '/';
+const normalizedPath = rawPath === '/' ? '/' : rawPath.replace(/\/$/, '');
+const canonicalPath = normalizedPath === '/en' ? '/en/' : normalizedPath;
+const canonicalUrl = `${siteUrl}${canonicalPath === '/' ? '/' : canonicalPath}`;
+const alternatePath = getAlternateLangPath(canonicalPath, lang);
+const alternateUrl = `${siteUrl}${alternatePath === '/' ? '/' : alternatePath}`;
+const metaDescription =
+  description ??
+  (lang === 'tr'
+    ? pathDescriptions.tr[canonicalPath as keyof typeof pathDescriptions.tr]
+    : pathDescriptions.en[canonicalPath as keyof typeof pathDescriptions.en]) ??
+  defaultDescriptions[lang];
+const pageTitle = title.includes('Finsoft') ? title : `${title} | Finsoft SAP Consulting`;
+const ogImage = `${siteUrl}/images/finsoft-logo-transparent.png`;
+const organizationSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'Finsoft',
+  url: siteUrl,
+  logo: ogImage,
+  sameAs: ['https://www.linkedin.com/company/finsoft-sap-financial/'],
+  email: 'info@finsoft.com.tr',
+  telephone: '+90 216 504 25 14'
+};
+const webpageSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: pageTitle,
+  description: metaDescription,
+  url: canonicalUrl,
+  inLanguage: lang,
+  isPartOf: {
+    '@type': 'WebSite',
+    name: 'Finsoft SAP Consulting',
+    url: siteUrl
+  }
+};
 ---
 
 <!DOCTYPE html>
@@ -15,13 +93,31 @@ import Footer from '../components/Footer.astro';
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{title} | Finsoft SAP Consulting</title>
-    <meta name="description" content="Finsoft — Türkiye'nin lider SAP FI/CO, Material Ledger ve Roll-Out danışmanlık firması. 15+ yıllık deneyim ile küresel finansal dönüşüm." />
-    <!-- Fonts -->
+    <title>{pageTitle}</title>
+    <meta name="description" content={metaDescription} />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="alternate" hreflang={lang} href={canonicalUrl} />
+    <link rel="alternate" hreflang={lang === 'tr' ? 'en' : 'tr'} href={alternateUrl} />
+    <link rel="alternate" hreflang="x-default" href={`${siteUrl}/`} />
+    <meta property="og:locale" content={lang === 'tr' ? 'tr_TR' : 'en_US'} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Finsoft SAP Consulting" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={metaDescription} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:alt" content="Finsoft SAP Consulting logo" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={metaDescription} />
+    <meta name="twitter:image" content={ogImage} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Work+Sans:wght@700;800;900&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script type="application/ld+json" set:html={JSON.stringify(organizationSchema)}></script>
+    <script type="application/ld+json" set:html={JSON.stringify(webpageSchema)}></script>
   </head>
   <body class="selection:bg-primary/20 selection:text-primary bg-background text-on-background font-body antialiased">
     <Header lang={lang} />
